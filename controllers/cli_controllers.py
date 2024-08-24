@@ -3,6 +3,7 @@ from flask import Blueprint
 from init import db, bcrypt
 from models.user import User
 from models.card import Card
+from models.comment import Comment
 
 db_commands = Blueprint("db", __name__)
 

@@ -13,11 +13,13 @@ class User(db.Model):
     is_admin = db.Column(db.Boolean, default=False)
 
     cards = db.relationship("Card", back_populates="user")
-
+    comments = db.relationship("Comment", back_populates="user")
 
 class UserSchema(ma.Schema):
+    cards = fields.List(fields.Nested("CardSchema", exclude=["user"]))
+    comments = fields.List(fields.Nested("CommentSchema", exclude=["user"]))
+
     class Meta:
-        cards = fields.List(fields.Nested("CardSchema", exclude=["user"]))
         fields = ("id", "name", "email", "password", "is_admin", "cards")
 
 # to handle a single user object
