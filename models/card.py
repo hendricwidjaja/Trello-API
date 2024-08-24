@@ -17,7 +17,7 @@ class Card(db.Model):
 
     user = db.relationship("User", back_populates="cards")
     # deletes all associated comments on card if card is deleted
-    comments = db.relationship("Comment", back_populates="cards", cascade="all, delete")
+    comments = db.relationship("Comment", back_populates="card", cascade="all, delete")
 
 
 class CardSchema(ma.Schema):
@@ -25,7 +25,8 @@ class CardSchema(ma.Schema):
     comments = fields.List(fields.Nested("CommentSchema", exclude=["card"]))
 
     class Meta:
-        fields = ("id", "title", "email", "description", "status", "priority", "date", "user")
+        fields = ("id", "title", "email", "description", "status", "priority", "date", "user", "comments")
+        ordered = True
 
 card_schema = CardSchema()
 
