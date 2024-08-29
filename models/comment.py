@@ -12,7 +12,7 @@ class Comment(db.Model):
     # Foreign Key (users.id = tablename.primarykey attribute)
     user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
     card_id = db.Column(db.Integer, db.ForeignKey("cards.id"), nullable=False)
-
+    # Define relationships in both models (back_populates value must equal the variable name on the other model)
     user = db.relationship("User", back_populates="comments")
     card = db.relationship("Card", back_populates="comments")
 
