@@ -5,8 +5,10 @@ from flask_jwt_extended import jwt_required, get_jwt_identity
 
 from init import db
 from models.card import Card, card_schema, cards_schema
+from controllers.comment_controller import comments_bp
 
 cards_bp = Blueprint("cards", __name__, url_prefix="/cards")
+cards_bp.register_blueprint(comments_bp)
 
 # /cards - GET - fetch all cards
 # /cards/<id> - GET - fetch a specific card
