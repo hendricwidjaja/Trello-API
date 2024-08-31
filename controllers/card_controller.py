@@ -5,7 +5,10 @@ from flask_jwt_extended import jwt_required, get_jwt_identity
 
 from init import db
 from models.card import Card, card_schema, cards_schema
+
 from controllers.comment_controller import comments_bp
+
+from utils import authorise_as_admin
 
 cards_bp = Blueprint("cards", __name__, url_prefix="/cards")
 cards_bp.register_blueprint(comments_bp)
@@ -59,6 +62,13 @@ def create_card():
 @cards_bp.route("/<int:card_id>", methods=["DELETE"])
 @jwt_required()
 def delete_card(card_id):
+    # check whether the user is admin or not
+    is_admin = authorise_as_admin()
+    # if not admin
+    if not is_admin:
+        # return error message
+        return {"error": "User is not authorised to perform this action."}
+
     # fetch the card from the database
     stmt = db.select(Card).filter_by(id=card_id)
     card = db.session.scalar(stmt)
@@ -82,8 +92,14 @@ def update_card(card_id):
     # fetch the card from the database
     stmt = db.select(Card).filter_by(id=card_id)
     card = db.session.scalar(stmt)
+    # check whether the user is admin or not
+    is_admin = authorise_as_admin()
     # if card exists
     if card:
+        # if the user is not the owner of the card
+        if (not is_admin) or (str(card.user_id) != get_jwt_identity()):
+            # return error message
+            return {"error": "Cannot perform this operation. Only owners are allowed to execute this operation"}
         # update fields as required
         card.title = body_data.get("title") or card.title
         card.description = body_data.get("description") or card.description
