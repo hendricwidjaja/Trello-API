@@ -96,7 +96,7 @@ def update_card(card_id):
     is_admin = authorise_as_admin()
     # if card exists
     if card:
-        # if the user is not the owner of the card
+        # if the user is not the owner of the card and not admin
         if not is_admin and str(card.user_id) != get_jwt_identity():
             # return error message
             return {"error": "Cannot perform this operation. Only owners are allowed to execute this operation"}
