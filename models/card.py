@@ -2,7 +2,7 @@ from init import db, ma
 from marshmallow import fields, validates
 from marshmallow.validate import Length, And, Regexp, OneOf
 from marshmallow.exceptions import ValidationError
-
+# Constant variables - PLEASE DO NOT CHANGE
 VALID_STATUSES = ("To Do", "In Progress", "Completed", "Testing", "Deployed")
 VALID_PRIORITIES = ("Low", "Medium", "High", "Immediate")
 
@@ -36,15 +36,15 @@ class CardSchema(ma.Schema):
 
     @validates("status")
     def validate_status(self, value):
-        # Function to see if the value of an existing card has a status of "In Progress"
-        if value == VALID_STATUSES[1]:
+        # Function to see if the value of an existing card has a status of "In Progress" / Data is fetched via card controller
+        if value == VALID_STATUSES[1]: # VALID_STATUSES index 1 = "In Progress"
             # Check whether an existing In Progress card exists or not
             # SELECT COUNT(*) FROM table_name WHERE status="In Progress"
-            stmt = db.select(db.func.count()).select_from(Card).filter_by(status=VALID_STATUSES[1])
-            count = db.session.scalar(stmt)
-            # If it exists
+            stmt = db.select(db.func.count()).select_from(Card).filter_by(status=VALID_STATUSES[1]) # Counts using db.func.count() to count how many entries under "status" = VALID_STATUSES[1] (which is "In Progress")
+            count = db.session.scalar(stmt) 
+            # If it exists (card that is already with "In Progress" status)
             if count > 0:
-                # send an error message
+                # send an error message / This error needs to be raised since we, as the programmer, have created this condition (not a standard error).
                 raise ValidationError("You already have an In-Progress card.")
 
     class Meta:

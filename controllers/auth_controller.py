@@ -57,7 +57,7 @@ def login_user():
         return {"error": "Invalid email or password"}, 400
     
 # /auth/users/user_id
-@auth_bp.route("/users", methods=["PUT", "PATCH"])
+@auth_bp.route("/users/", methods=["PUT", "PATCH"])
 @jwt_required()
 def update_user():
     # get the fields from the body of the request
