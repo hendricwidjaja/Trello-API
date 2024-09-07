@@ -4,6 +4,7 @@ from flask import Blueprint, request
 
 from models.user import User, user_schema, UserSchema
 from init import bcrypt, db
+from utils import auth_as_admin_decorator
 
 from sqlalchemy.exc import IntegrityError
 from psycopg2 import errorcodes
@@ -56,7 +57,7 @@ def login_user():
         # Respond back with an error message
         return {"error": "Invalid email or password"}, 400
     
-# /auth/users/user_id
+# /auth/users/
 @auth_bp.route("/users/", methods=["PUT", "PATCH"])
 @jwt_required()
 def update_user():
@@ -81,3 +82,24 @@ def update_user():
     else:
         # return an error response
         return {"error": "User does not exist."}
+    
+# /auth/users/user_id
+@auth_bp.route("/users/<int:user_id>", methods=["DELETE"])
+@jwt_required()
+@auth_as_admin_decorator
+def delete_user(user_id):
+    # find the user with the id from the db
+    # SELECT * FROM users WHERE id==user_id;
+    stmt = db.select(User).filter_by(id=user_id)
+    user = db.session.scalar(stmt)
+    # if exists:
+    if user:
+        # delete the user
+        db.session.delete(user)
+        db.session.commit()
+        # return an acknowledgement message
+        return {"message": f"User with id {user_id} is deleted."}
+    # else:
+    else:
+        # return error message
+        return {"message": f"User with id {user_id} not found."}, 404
