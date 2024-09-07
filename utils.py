@@ -5,6 +5,7 @@ from functools import wraps
 from init import db
 from models.user import User
 
+'''
 def authorise_as_admin():
     # get the user's id from get_jwt_identity
     user_id = get_jwt_identity()
@@ -15,7 +16,7 @@ def authorise_as_admin():
     return user.is_admin
 
 # creating a decorator for authorise_as_admin
-
+'''
 def auth_as_admin_decorator(fn):
     @wraps(fn)
     def wrapper(*args, **kwargs):
