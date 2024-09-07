@@ -117,3 +117,5 @@ def update_card(card_id):
     else:
         # return an error message
         return {"error": f"Card with id {card_id} not found"}, 404
+    
+# To be reviewed - line 102 to 106
