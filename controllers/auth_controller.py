@@ -23,15 +23,16 @@ def register_user():
             name = body_data.get("name"),
             email = body_data.get("email")
         )
-        # Hash the password
+        # Hash the password using bcrypt
         password = body_data.get("password")
         if password:
             user.password = bcrypt.generate_password_hash(password).decode("utf-8")
         # Add and commit to the DB
         db.session.add(user)
         db.session.commit()
-        # Return acknowledgement
+        # Return acknowledgement for the successful creation of a user account
         return user_schema.dump(user), 201
+    # If user creation fails, send an appropriate error response based on the type of error/violation
     except IntegrityError as err:
         if err.orig.pgcode == errorcodes.NOT_NULL_VIOLATION:
             return {"error": f"The column {err.orig.diag.column_name} is required"}, 400
@@ -43,14 +44,14 @@ def register_user():
 def login_user():
     # Get the data from the body of the request
     body_data = request.get_json()
-    # Find the user in DB with that email address
+    # Find the user in the database with that email address
     stmt = db.select(User).filter_by(email=body_data.get("email"))
     user = db.session.scalar(stmt)
-    # If user exists and pw is correct
+    # If the user exists and the password is correct
     if user and bcrypt.check_password_hash(user.password, body_data.get("password")):
-        # create JWT
+        # create a JWT token
         token = create_access_token(identity=str(user.id), expires_delta=timedelta(days=1))
-        # Respond back
+        # Then return a response to the user with their email address, admin status and JWT token
         return {"email": user.email, "is_admin": user.is_admin, "token": token}
     # Else
     else:
@@ -59,24 +60,26 @@ def login_user():
     
 # /auth/users/
 @auth_bp.route("/users/", methods=["PUT", "PATCH"])
+# Check if the user has a valid JWT token in the header of their request
 @jwt_required()
 def update_user():
     # get the fields from the body of the request
     body_data = UserSchema().load(request.get_json(), partial=True)
+    # If the user inserts a new passowrd, store the new password in a variable named "password" 
     password = body_data.get("password")
-    # fetch the user from the database
+    # fetch the user from the database by extracting the user's identity from the JWT token they passed in the header and finding the user ID it matches to in the database 
     # SELECT * FROM user WHERE id = get_jwt_identity
     stmt = db.select(User).filter_by(id=get_jwt_identity())
     user = db.session.scalar(stmt)
-    # if exists:
+    # if the user exists:
     if user:
         # update the fields as required
         user.name = body_data.get("name") or user.name
         if password:
             user.password = bcrypt.generate_password_hash(password).decode("utf-8")
-        # commit to the database
+        # commit the changes to the database
         db.session.commit()
-        # return a response
+        # return a response to the user, acknowledging the changes
         return user_schema.dump(user)
     # else:
     else:
